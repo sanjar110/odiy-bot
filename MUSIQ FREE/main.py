@@ -7,8 +7,8 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram import F
 import asyncio
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-CHANNEL = os.getenv("CHANNEL")
+BOT_TOKEN = os.getenv("8637448255:AAGna6cWyBvrk3FrtfPKQob_tD607Y4MTMs")
+CHANNEL = os.getenv("techpro_km")
 
 bot = Bot(BOT_TOKEN)
 dp = Dispatcher()
