@@ -1,162 +1,152 @@
 import os
-import asyncio
-import logging
 import yt_dlp
-from aiogram import Bot, Dispatcher, F, types
+from aiogram import Bot, Dispatcher, types
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.filters import CommandStart
-from aiogram.types import (
-    InlineKeyboardMarkup,
-    InlineKeyboardButton,
-    FSInputFile,
-    CallbackQuery,
-)
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram import F
+import asyncio
 
-# ================== CONFIG ==================
-TOKEN = "8637448255:AAGna6cWyBvrk3FrtfPKQob_tD607Y4MTMs"
-CHANNEL = "@techpro_km"
-# ============================================
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+CHANNEL = os.getenv("CHANNEL")
 
-logging.basicConfig(level=logging.INFO)
-
-bot = Bot(token=TOKEN)
+bot = Bot(BOT_TOKEN)
 dp = Dispatcher()
 
-search_cache = {}  # vaqtinchalik saqlash
+search_results = {}
 
-# ================== SUB CHECK ==================
-async def check_subscription(user_id: int) -> bool:
-    try:
-        chat = await bot.get_chat(CHANNEL)
-        member = await bot.get_chat_member(chat.id, user_id)
-        return member.status in ("member", "administrator", "creator")
-    except:
-        return False
-
-
+# Kanal klaviaturasi
 def sub_keyboard():
+
     if str(CHANNEL).startswith("@"):
-        url = f"https://t.me/{CHANNEL.replace('@','')}"
+        link = f"https://t.me/{CHANNEL[1:]}"
     else:
-        url = "https://t.me/"
-    return InlineKeyboardMarkup(
+        link = CHANNEL
+
+    keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="📢 Kanalga obuna bo‘lish", url=url)],
+            [InlineKeyboardButton(text="📢 Kanalga obuna", url=link)],
             [InlineKeyboardButton(text="✅ Tekshirish", callback_data="check_sub")]
         ]
     )
 
-# ================== START ==================
-@dp.message(CommandStart())
-async def start_handler(message: types.Message):
-    if not await check_subscription(message.from_user.id):
-        await message.answer(
-            "❗ Avval kanalga obuna bo‘ling.",
-            reply_markup=sub_keyboard()
-        )
-        return
+    return keyboard
 
-    await message.answer("🎵 Artist yoki qo‘shiq nomini yozing.")
 
-# ================== SEARCH ==================
-def search_youtube(query: str):
-    ydl_opts = {"quiet": True}
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(f"ytsearch10:{query}", download=False)
-        return info["entries"]
-
-@dp.message()
-async def search_handler(message: types.Message):
-    if not await check_subscription(message.from_user.id):
-        await message.answer(
-            "❗ Avval kanalga obuna bo‘ling.",
-            reply_markup=sub_keyboard()
-        )
-        return
-
-    msg = await message.answer("🔎 Qidirilmoqda...")
+# Obuna tekshirish
+async def check_sub(user_id):
 
     try:
-        results = search_youtube(message.text)
+        member = await bot.get_chat_member(CHANNEL, user_id)
+        return member.status in ["member","administrator","creator"]
+    except:
+        return False
 
-        if not results:
-            await msg.edit_text("❌ Hech narsa topilmadi.")
-            return
 
-        search_cache[message.from_user.id] = results
+# START
+@dp.message(CommandStart())
+async def start_handler(message: types.Message):
 
-        buttons = []
-        for i, video in enumerate(results):
-            title = video["title"][:40]
-            buttons.append(
-                [InlineKeyboardButton(
-                    text=f"{i+1}. {title}",
-                    callback_data=f"dl_{i}"
-                )]
-            )
+    if not await check_sub(message.from_user.id):
+        await message.answer(
+            "❗ Botdan foydalanish uchun kanalga obuna bo‘ling",
+            reply_markup=sub_keyboard()
+        )
+        return
 
-        kb = InlineKeyboardMarkup(inline_keyboard=buttons)
+    await message.answer(
+        "🎧 Qo‘shiq nomi yoki artist yozing"
+    )
 
-        await msg.edit_text("🎧 Top 10 natija:", reply_markup=kb)
 
-    except Exception as e:
-        print(e)
-        await msg.edit_text("❌ Xatolik yuz berdi.")
+# Obuna tekshirish tugmasi
+@dp.callback_query(F.data == "check_sub")
+async def check_handler(callback: types.CallbackQuery):
 
-# ================== DOWNLOAD ==================
-def download_audio(url: str):
-    os.makedirs("downloads", exist_ok=True)
+    if await check_sub(callback.from_user.id):
+        await callback.message.edit_text("✅ Obuna tasdiqlandi\n\n🎧 Qo‘shiq nomi yozing")
+    else:
+        await callback.answer("❌ Avval kanalga obuna bo‘ling", show_alert=True)
+
+
+# Qidiruv
+@dp.message()
+async def search_handler(message: types.Message):
+
+    if not await check_sub(message.from_user.id):
+        await message.answer(
+            "❗ Kanalga obuna bo‘ling",
+            reply_markup=sub_keyboard()
+        )
+        return
+
+    query = message.text
+
+    await message.answer("🔎 Qidirilmoqda...")
 
     ydl_opts = {
-        "format": "bestaudio/best",
-        "outtmpl": "downloads/%(title)s.%(ext)s",
-        "quiet": True,
-        "postprocessors": [{
-            "key": "FFmpegExtractAudio",
-            "preferredcodec": "mp3",
-            "preferredquality": "192",
-        }],
+        'quiet': True,
+        'extract_flat': True
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(url, download=True)
-        filename = ydl.prepare_filename(info)
-        return os.path.splitext(filename)[0] + ".mp3"
+        info = ydl.extract_info(f"ytsearch10:{query}", download=False)
 
+    results = info['entries']
 
-# ================== CALLBACK DOWNLOAD ==================
-@dp.callback_query(F.data.startswith("dl_"))
-async def download_callback(callback: CallbackQuery):
-    index = int(callback.data.split("_")[1])
+    search_results[message.from_user.id] = results
 
-    results = search_cache.get(callback.from_user.id)
+    kb = InlineKeyboardBuilder()
 
-    if not results:
-        await callback.answer("❌ Vaqt tugadi. Qayta qidiring.", show_alert=True)
-        return
-
-    video = results[index]
-    url = video["webpage_url"]
-
-    await callback.message.edit_text("⬇ Yuklanmoqda...")
-
-    try:
-        file_path = download_audio(url)
-
-        await callback.message.answer_audio(
-            FSInputFile(file_path),
-            caption="✅ Yuklab olindi"
+    for i, video in enumerate(results):
+        kb.button(
+            text=f"{i+1}. {video['title'][:40]}",
+            callback_data=f"music_{i}"
         )
 
-        os.remove(file_path)
+    kb.adjust(1)
 
-    except Exception as e:
-        print(e)
-        await callback.message.answer("❌ Yuklashda xatolik.")
+    await message.answer(
+        "🎵 Topilgan qo‘shiqlar:",
+        reply_markup=kb.as_markup()
+    )
 
-# ================== RUN ==================
+
+# Qo‘shiq tanlash
+@dp.callback_query(F.data.startswith("music_"))
+async def music_handler(callback: types.CallbackQuery):
+
+    index = int(callback.data.split("_")[1])
+
+    video = search_results[callback.from_user.id][index]
+
+    url = f"https://youtube.com/watch?v={video['id']}"
+
+    await callback.message.answer("⬇️ Yuklanmoqda...")
+
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'outtmpl': 'music.%(ext)s',
+        'quiet': True
+    }
+
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url])
+
+    for file in os.listdir():
+        if file.startswith("music"):
+            await bot.send_audio(
+                callback.from_user.id,
+                audio=types.FSInputFile(file),
+                title=video['title']
+            )
+            os.remove(file)
+            break
+
+
+# Botni ishga tushirish
 async def main():
-    me = await bot.get_me()
-    print(f"🚀 Bot ishga tushdi: @{me.username}")
+    print("🚀 Bot ishga tushdi")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
