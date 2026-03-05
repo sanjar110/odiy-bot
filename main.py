@@ -13,7 +13,7 @@ from aiogram.types import (
 
 # ================== CONFIG ==================
 TOKEN = "8637448255:AAGna6cWyBvrk3FrtfPKQob_tD607Y4MTMs"
-HANNELC = "@techpro_km"
+CHANNEL = "@techpro_km"
 # ============================================
 
 logging.basicConfig(level=logging.INFO)
@@ -160,4 +160,5 @@ async def main():
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
+
     asyncio.run(main())
