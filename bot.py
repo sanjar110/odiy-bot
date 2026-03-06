@@ -4,8 +4,8 @@ from telegram.ext import Application, CommandHandler
 
 app = Flask(__name__)
 
-BOT_TOKEN = "YOUR_BOT_TOKEN"
-CHANNEL_ID = "@techpro_km"
+BOT_TOKEN = "8637448255:AAGna6cWyBvrk3FrtfPKQob_tD607Y4MTMs"
+CHANNEL_ID = "techpro_km"
 
 async def start(update, context):
     user_id = update.effective_user.id
@@ -38,3 +38,4 @@ application.run_webhook(
 @app.route("/")
 def index():
     return "MUSIQA_TECH_BOT WebApp ishlayapti!"
+
