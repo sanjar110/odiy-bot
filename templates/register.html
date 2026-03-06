@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <title>Ro‘yxatdan o‘tish</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <h2>Ro‘yxatdan o‘tish</h2>
+  <form method="post" action="/register">
+    <input type="text" name="username" placeholder="Login" required>
+    <input type="password" name="password" placeholder="Parol" required>
+    <button type="submit">Ro‘yxatdan o‘tish</button>
+  </form>
+</body>
+</html>

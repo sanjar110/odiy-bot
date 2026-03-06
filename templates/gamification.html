@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <title>Gamification</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <h2>Gamification</h2>
+  <p>Foydalanuvchilar badge, level va top listener bo‘lishlari mumkin.</p>
+  <ul>
+    {% for b in badges %}
+      <li>🏅 {{ b }}</li>
+    {% endfor %}
+  </ul>
+  <button>Profilimni ko‘rish</button>
+</body>
+</html>

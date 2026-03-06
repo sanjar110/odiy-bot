@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <h2>Admin Panel</h2>
+  <section>
+    <h3>Tariflarni boshqarish</h3>
+    <button>Tarif qo‘shish</button>
+    <button>Tarifni o‘zgartirish</button>
+    <button>Tarifni o‘chirish</button>
+  </section>
+  <section>
+    <h3>Reklama joylash</h3>
+    <form>
+      <input type="text" placeholder="Reklama matni">
+      <button type="submit">Joylash</button>
+    </form>
+  </section>
+</body>
+</html>

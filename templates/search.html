@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <title>Qidiruv</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <h2>Qidiruv</h2>
+  <form method="get" action="/search">
+    <input type="text" name="q" placeholder="Qo‘shiq, video yoki artist qidirish..." required>
+    <button type="submit">Qidir</button>
+  </form>
+
+  <ul>
+    {% for r in results %}
+      <li>{{ r.title }}</li>
+    {% endfor %}
+  </ul>
+</body>
+</html>

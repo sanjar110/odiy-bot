@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <title>Premium Tariflar</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</head>
+<body>
+  <h2>Premium Tariflar</h2>
+  <ul>
+    {% for t in tariffs %}
+      <li>
+        <strong>{{ t.name }}</strong> — {{ t.price }}
+        <button onclick="subscribe('{{ t.name }}')">Obuna bo‘lish</button>
+      </li>
+    {% endfor %}
+  </ul>
+</body>
+</html>

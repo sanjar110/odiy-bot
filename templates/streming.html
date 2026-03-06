@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <title>Live Streaming</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <h2>Jonli Efir</h2>
+  <p>Bu yerda foydalanuvchilar qo‘shiq yoki video klipni jonli ulashishlari mumkin.</p>
+  <video controls width="100%">
+    <source src="/static/live_sample.mp4" type="video/mp4">
+  </video>
+  <button>Jonli efirni boshlash</button>
+</body>
+</html>

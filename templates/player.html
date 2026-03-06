@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <title>Player</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <h2>Player</h2>
+  <div class="player">
+    <video controls width="100%">
+      <source src="/static/sample.mp4" type="video/mp4">
+    </video>
+    <audio controls>
+      <source src="/static/sample.mp3" type="audio/mpeg">
+    </audio>
+  </div>
+</body>
+</html>
